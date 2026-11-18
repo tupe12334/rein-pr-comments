@@ -1,0 +1,23 @@
+{
+  "name": "pr-comments",
+  "version": "0.1.0",
+  "description": "Judge the open review comments on a pull request, then act on them.",
+  "license": "MIT",
+  "private": true,
+  "repository": "github:tupe12334/rein-pr-comments",
+  "keywords": [
+    "rein",
+    "github",
+    "pull-requests",
+    "code-review"
+  ],
+  "files": [
+    "**/*.rein",
+    "scripts/",
+    "README.md",
+    "rein.json"
+  ],
+  "engines": {
+    "rein": "^0.1.0"
+  }
+}

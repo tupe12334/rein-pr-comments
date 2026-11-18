@@ -1,0 +1,62 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+}
+
+interface Judgment {
+  /** One line per open comment: its link, then agree or disagree. For
+   * agree, whether it is critical (a Critical point, or one about security or
+   * data loss), and whether it is Low: a 🟡 or "Low" label, "nit", or "minor"
+   * in the thread. */
+  lines: string;
+  /** One line per agreed point that is not Low, title or body included, or
+   * none. */
+  fix_lines: string;
+  /** One line per agreed critical point: its link and the point, or none. */
+  critical_lines: string;
+  /** Do you agree with an open comment about the title or body of the pull
+   * request itself, such as a wrong description or a stale stacked on line?
+   */
+  pr_text_points: boolean;
+  /** Is any agreed point Low? */
+  low_points: boolean;
+  /** Is any agreed point not Low, title or body included? */
+  fix_points: boolean;
+  /** Is any agreed point critical? */
+  critical_points: boolean;
+}
+
+/**
+ * Judge each open review comment on a pull request. The routing of the
+ * judgment is in judge/route.rein.
+ */
+export default async function judge({ pr }: Input) {
+  /** Your judgment of each open comment on the pull request. */
+  const judgment: Judgment = await request(`Judge each open comment on ${pr}
+    yourself. A failed-verify review body is one line per failed case: agree
+    with each case, and name its file and line when the body gives them.
+    Reply on each comment you disagree with, with your reason. Do not judge a
+    thread whose only 🤖 reply starts "🤖 Noted as a low follow-up" or
+    "🤖 Review loop cap reached (5 rounds)", unless a comment came after
+    that reply. Start each post with 🤖.
+    Answer lines: one line per open comment with its link, agree or disagree,
+    whether an agree point is critical, and whether it is Low. A point that is
+    critical or about the title or body of ${pr} is never Low. Answer
+    fix_lines: one line per agreed point that is not Low, or none. Answer
+    critical_lines: one line per agreed critical point, or none. Answer
+    low_points yes if any agreed point is Low. Answer fix_points yes if any
+    agreed point is not Low. Answer critical_points yes if any agreed point is
+    critical. Answer pr_text_points yes if any agreed point is about the title
+    or body of ${pr}.`);
+
+  return @./judge/route(
+    pr=pr,
+    lines=judgment.lines,
+    fix_lines=judgment.fix_lines,
+    critical_lines=judgment.critical_lines,
+    pr_text_points=judgment.pr_text_points,
+    low_points=judgment.low_points,
+    fix_points=judgment.fix_points,
+    critical_points=judgment.critical_points,
+  );
+}

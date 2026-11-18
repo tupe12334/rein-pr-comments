@@ -1,0 +1,40 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+}
+
+/**
+ * The agent disagrees with a review comment and replied with its reason.
+ * A human reviewer must answer. An agent reviewer gets a fresh review that
+ * reads the replies, so the pull request does not stall.
+ */
+export default async function disagree({ pr }: Input) {
+  /** Did an agent, not a human, write every comment you disagree with? */
+  const agent_only: boolean = await request(
+    `Check who wrote each comment on ${pr} that you disagree with.`,
+  );
+
+  if (!agent_only) {
+    return `Release your claim on ${pr}: post a comment, 🤖 Released by
+    <your session id or name>. Return: skipped ${pr}: I disagree with a
+    review comment and replied with my reason.`;
+  }
+  /** What did the fresh reviewer decide? */
+  const verdict: "looks good" | "changes needed" = await request(
+    delegate(model=`use a new agent session`, task=`Review the pull request
+    ${pr} again as a strict reviewer. Read the full diff, the checks, the
+    earlier review comments and the replies to them. Accept a reply whose
+    reason is right; insist where it is wrong. Post one review on ${pr}.
+    Start each post with 🤖.
+    Answer looks good only if nothing must change. This session reviews
+    ${pr} only.`),
+  );
+  if (verdict === "looks good") {
+    return `The fresh review says ${pr} looks good. Start this program again
+    for ${pr} with the task merge, so CI and conflicts are checked before any
+    merge.`;
+  }
+  return `Release your claim on ${pr}: post a comment, 🤖 Released by
+  <your session id or name>. Return: skipped ${pr}: the fresh review still
+  asks for changes after my reply.`;
+}

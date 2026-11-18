@@ -1,0 +1,29 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** One line per open comment: its link, agree or disagree, critical, Low. */
+  lines: string;
+}
+
+interface Tracker {
+  /** Is a Jira key, such as ABC-123, in the branch name, title or body? */
+  jira_linked: boolean;
+}
+
+/**
+ * The review loop is closed, from round 6. Each agreed point that is not
+ * critical is tracked, and gets one reply with the link of its follow-up. No
+ * commit is made for it.
+ */
+export default async function cap({ pr, lines }: Input) {
+  /** Does the pull request have a Jira key to track its points in? */
+  const tracker: Tracker = await request(`Answer jira_linked yes if a Jira
+    key, such as ABC-123, is in the branch name, title or body of ${pr}.
+    Otherwise answer no.`);
+
+  if (tracker.jira_linked) {
+    return @./cap/jira(pr=pr, lines=lines);
+  }
+
+  return @./cap/issue(pr=pr, lines=lines);
+}

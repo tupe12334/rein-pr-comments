@@ -1,0 +1,22 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** Were the agreed points tracked and replied on? */
+  tracked: boolean;
+}
+
+/**
+ * After the agreed points of a closed review loop are tracked: stop when one
+ * could not be tracked, or move on to the merge. No tracked point blocks.
+ */
+export default function done({ pr, tracked }: Input) {
+  if (!tracked) {
+    return `Release your claim on ${pr}: post a comment, 🤖 Released by
+    <your session id or name>. Return: skipped ${pr}:
+    a review point could not be tracked.`;
+  }
+
+  return `Start this program again for ${pr} with the task merge, so CI and
+  conflicts are checked before any merge. Every point is tracked, and the
+  review loop is closed. No tracked point blocks.`;
+}

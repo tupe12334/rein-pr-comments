@@ -1,0 +1,77 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** One line per open comment: its link, agree or disagree, critical, Low. */
+  lines: string;
+  /** One line per agreed point that is not Low, or none. */
+  fix_lines: string;
+  /** Is any agreed point about the title or body of the pull request? */
+  pr_text_points: boolean;
+  /** Is any agreed point Low? */
+  low_points: boolean;
+  /** Is any agreed point not Low? */
+  fix_points: boolean;
+  /** Is any agreed point critical? */
+  critical_points: boolean;
+  /** One line per critical point: its link and the point, or none. */
+  critical_lines: string;
+}
+
+interface Round {
+  /** Is the review round 4 or later? */
+  round_4_plus: boolean;
+  /** Is the review round 6 or later, after five rounds of review? */
+  round_6_plus: boolean;
+  /** Did the script print a round number? */
+  counted: boolean;
+  /** The review round, as the script printed it, such as 4. */
+  round: string;
+}
+
+/**
+ * Count the review round, then route the agreed points. From round 6 the
+ * review loop is closed: a critical point asks the owner, and every other
+ * agreed point is tracked. From round 4 a Low point is noted and tracked.
+ * Rounds 1 to 5 fix every other point. A round that cannot be counted stops
+ * the run, so no point is dropped and no cap is skipped.
+ */
+export default async function reviewRound({
+  pr, lines, fix_lines, pr_text_points, low_points, fix_points,
+  critical_points, critical_lines,
+}: Input) {
+  /** The review round, counted by the script. */
+  const round: Round = await request(`Count the review round on ${pr}. Run:
+    P="$(readlink -f ~/.config/rein/programs/npm/node_modules/pr-comments)"
+    bash "$P/scripts/review-round.sh" ${pr}
+    Answer round as the number it prints, round_4_plus yes when it is 4 or
+    more, round_6_plus yes when it is 6 or more, and counted no when the
+    script fails or prints nothing; then the other answers are no.`);
+  if (!round.counted) {
+    return @./round/uncounted(pr=pr);
+  }
+
+  if (round.round_6_plus && critical_points) {
+    return @./round/critical(pr=pr, critical_lines=critical_lines);
+  }
+
+  if (round.round_6_plus) {
+    return @./round/cap(pr=pr, lines=lines);
+  }
+
+  if (round.round_4_plus && low_points) {
+    return @../../low/track(
+      pr=pr,
+      round=round.round,
+      lines=lines,
+      fix_lines=fix_lines,
+      fix_points=fix_points,
+      pr_text_points=pr_text_points,
+    );
+  }
+
+  if (pr_text_points) {
+    return @../../edit_pr_text(pr=pr, lines=lines);
+  }
+
+  return @../../act(pr=pr, lines=lines);
+}

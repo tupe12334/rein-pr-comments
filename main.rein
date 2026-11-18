@@ -1,0 +1,38 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+}
+
+/**
+ * Judge the open review comments on a pull request, then act on them. A
+ * point about the pull request's own text is fixed on the pull request first:
+ * after the merge that text is history, so an issue for it can never be fixed.
+ */
+export default async function addressComments({ pr }: Input) {
+  /** Is any review point open: a thread of any author, or a review body?
+   * The thread rule is in this function. */
+  const open_comments: boolean = await request(`Is any point open on ${pr}?
+     Threads, any author: gh api graphql --paginate -F owner=<owner>
+     -F name=<repo> -F number=<number> -f query='query($owner:String!,
+     $name:String!,$number:Int!,$endCursor:String){repository(owner:$owner,
+     name:$name){pullRequest(number:$number){reviewThreads(first:100,
+     after:$endCursor){pageInfo{hasNextPage endCursor} nodes{isResolved}}}}}'.
+     A thread is open when isResolved is false. A resolved thread is closed,
+     and an unresolved one stays open, even with a 🤖 reply on it. The one
+     exception: a thread whose only 🤖 reply starts "🤖 Noted as a low
+     follow-up" or "🤖 Review loop cap reached (5 rounds)" is closed,
+     unless a comment came after that reply. Reviews by
+     you: gh api --paginate
+     repos/<owner>/<repo>/pulls/<number>/reviews. A body that starts with
+     🤖 Verify at the head sha (gh pr view ${pr} --json headRefOid) on <env>:
+     failed is open, once per failed case. Answer yes if any is open.`);
+
+  if (!open_comments) {
+    return `No comment is open on ${pr}. Ask the reviewer for a new review.
+    Start each post with 🤖. Then release your claim on ${pr}: post a
+    comment, 🤖 Released by <your session id or name>. Return: skipped
+    ${pr}, no comment is open.`;
+  }
+
+  return @./judge(pr=pr);
+}

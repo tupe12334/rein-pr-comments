@@ -1,0 +1,45 @@
+interface Input {
+  /** The link of the pull request of this account, with review comments. */
+  pr: string;
+  /** One line per open comment: its link, then agree or disagree, and for
+   * agree, whether it is critical. */
+  lines: string;
+}
+
+/**
+ * Fix every agreed point as commits on the pull request's own branch. No
+ * stacked pull request, no issue: the owner gets one full pull request, not
+ * a pile of build-ups. Docs updates for the pull request's change are fixed
+ * on its branch too, never sent to a tracker.
+ */
+export default async function pushFixes({ pr, lines }: Input) {
+  /** Are the fixes pushed to the branch of the pull request as you judged? */
+  const acted: boolean = await request(delegate(model=`use haiku model`,
+    task=`Act on this judgment of the open comments on ${pr}: ${lines}.
+    Do not change any judgment. Fix each agree point, critical or not, as
+    commits on the head branch of ${pr} itself, in your own worktree, and
+    push without force. Open no new pull request and no issue. Skip each
+    comment about the title or body of ${pr}: it is fixed on ${pr}. A docs
+    update (README, docs pages, code comments, examples) that describes the
+    change of ${pr} is in its scope: fix it on the branch, never send it to
+    a tracker. Leave a point unfixed only when it is a separate change, out
+    of the scope of
+    ${pr}, and not critical: reply that it goes to the tracker of ${pr}
+    before the merge. With no tracker, the owner is asked to name a tracker
+    or to merge without tracking it, and the point can still be fixed on the
+    branch. If you cannot push to the head branch of ${pr} (a fork without
+    maintainer edits), push nothing, open nothing, and answer no.
+    Reply on each fixed comment with the fix sha and its commit link, so the
+    thread can be resolved: "🤖 Fixed in <sha>: <commit link>".
+    Start each post with 🤖.
+    Answer yes if done.`),
+  );
+
+  if (!acted) {
+    return `Release your claim on ${pr}: post a comment, 🤖 Released by
+    <your session id or name>. Return: skipped ${pr}: the review comments
+    were not fixed on its branch.`;
+  }
+
+  return @../follow_up(pr=pr, pushed=true);
+}

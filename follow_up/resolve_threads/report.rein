@@ -1,0 +1,30 @@
+interface Input {
+  /** The link of the pull request whose review comments were acted on. */
+  pr: string;
+  /** Were fix commits pushed to the branch of the pull request in this run? */
+  pushed: boolean;
+  /** One line per thread left open, or none. */
+  left_open: string;
+}
+
+/**
+ * Say how the run ends after the review threads were resolved, and list
+ * the threads left open.
+ */
+export default function report({ pr, pushed, left_open }: Input) {
+  if (!pushed) {
+    return `No commit was pushed to ${pr}: the review points were answered
+    or fixed in its title or body. Ask the reviewer for a new review of
+    ${pr}. Start each post with 🤖. Then release your claim on ${pr}: post
+    a comment, 🤖 Released by <your session id or name>. Return: skipped
+    ${pr}: its review points were answered, waiting for the new review.
+    Threads left open: ${left_open}`;
+  }
+
+  return `The fixes are new commits on ${pr}, so its earlier reviews count
+  as no review. Ask the reviewer for a new review of ${pr}.
+  Start each post with 🤖. Then release your claim on ${pr}: post a
+  comment, 🤖 Released by <your session id or name>. Return: skipped ${pr}:
+  fixed on its branch, waiting for the new review. Threads left open:
+  ${left_open}`;
+}

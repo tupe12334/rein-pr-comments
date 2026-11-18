@@ -1,0 +1,39 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** One line per open comment: its link, then agree or disagree, and for
+   * agree, whether it is critical. */
+  lines: string;
+}
+
+/**
+ * Act on the judgment of the open review comments. A judgment with only
+ * disagree points goes straight to the follow-up, whoever the author is.
+ * Agreed points are fixed only on a pull request of this account.
+ */
+export default async function act({ pr, lines }: Input) {
+  /** Is any line an agree point that needs a commit on the branch? */
+  const fix_points: boolean = await request(`Of these comments on ${pr}:
+    ${lines}. Answer yes if any one is an agree point that is not about the
+    title or body of ${pr}, and no 🤖 reply on it already names a fix commit
+    on the head branch. Otherwise answer no: each one is a disagree, an agree
+    point about the title or body, or a point already fixed on the branch.`);
+
+  if (!fix_points) {
+    return @./follow_up(pr=pr, pushed=false);
+  }
+
+  /** Is the author of the pull request this account, the owner's own? */
+  const own: boolean = await request(`Answer yes if the author of ${pr} is
+    the GitHub account you act as: compare gh pr view ${pr} --json author
+    with gh api user --jq .login. Otherwise answer no.`);
+
+  if (!own) {
+    return `Push nothing to the branch of ${pr}: its author is another person.
+    Release your claim on ${pr}: post a comment, 🤖 Released by <your session
+    id or name>. Return: skipped ${pr}: its author is another person, so its
+    branch was not changed.`;
+  }
+
+  return @./act/push_fixes(pr=pr, lines=lines);
+}

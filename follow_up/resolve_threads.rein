@@ -1,0 +1,54 @@
+interface Input {
+  /** The link of the pull request whose review comments were acted on. */
+  pr: string;
+  /** Were fix commits pushed to the branch of the pull request in this run?
+   * A thread fixed in one of them is done. */
+  pushed: boolean;
+  /** Does your judgment disagree with any open comment on the pull request?
+   */
+  disagree: boolean;
+}
+
+interface Resolution {
+  /** True when every fixed thread is resolved. */
+  resolved: boolean;
+  /** One line per thread left open: its link, then why. None when none. */
+  open: string;
+}
+
+/**
+ * Resolve the review threads that are fixed, right after the fix is pushed
+ * or the reply is posted. Every fixed thread is resolved, whoever started
+ * it: a human reviewer, a bot, or this account. A thread that a reply
+ * disagrees with, answers without a code fix, or defers to a follow-up stays
+ * open, and still counts as open for the merge.
+ */
+export default async function resolveThreads(
+  { pr, pushed, disagree }: Input,
+) {
+  /** Which review threads of the pull request are fixed, and which stay open?
+   */
+  const resolution: Resolution = await request(`Resolve the review threads
+    of ${pr} that are fixed. Read each thread's isResolved, and each comment's
+    author login and body, with gh api graphql. A thread is fixed when a 🤖
+    reply on it names a fix commit sha that is on the head branch of ${pr},
+    or when a 🤖 reply says the title or body of ${pr} is fixed. Resolve a
+    fixed thread that is not resolved yet, with the GraphQL mutation
+    resolveReviewThread (input threadId). Resolve every fixed thread, whoever
+    started it: a human reviewer, a bot, or the account you act as. A thread
+    stays open when its 🤖 reply disagrees, answers without a code fix, or
+    defers to a follow-up, and when no 🤖 reply is on it. Resolve nothing
+    else. Set resolved to true only when every fixed thread is resolved. In
+    open, list each thread left open: its link and why, or the word none
+    when no thread is left open.`);
+
+  if (disagree) {
+    return @./disagree(pr=pr);
+  }
+
+  return @./resolve_threads/report(
+    pr=pr,
+    pushed=pushed,
+    left_open=resolution.open,
+  );
+}

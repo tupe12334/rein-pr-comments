@@ -1,0 +1,52 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** One line per open comment: its link, agree or disagree, critical, Low. */
+  lines: string;
+  /** One line per agreed point that is not Low, or none. */
+  fix_lines: string;
+  /** Is any agreed point about the title or body of the pull request? */
+  pr_text_points: boolean;
+  /** Is any agreed point Low? */
+  low_points: boolean;
+  /** Is any agreed point not Low? */
+  fix_points: boolean;
+  /** Is any agreed point critical? */
+  critical_points: boolean;
+  /** One line per critical point: its link and the point, or none. */
+  critical_lines: string;
+}
+
+/**
+ * Route the judged comments. An agreed point, Low or not, is routed by its
+ * review round. A judgment with only disagree points goes to the follow-up.
+ */
+export default function route({
+  pr,
+  lines,
+  fix_lines,
+  pr_text_points,
+  low_points,
+  fix_points,
+  critical_points,
+  critical_lines,
+}: Input) {
+  if (critical_points || low_points || fix_points) {
+    return @./route/round(
+      pr=pr,
+      lines=lines,
+      fix_lines=fix_lines,
+      pr_text_points=pr_text_points,
+      low_points=low_points,
+      fix_points=fix_points,
+      critical_points=critical_points,
+      critical_lines=critical_lines,
+    );
+  }
+
+  if (pr_text_points) {
+    return @../edit_pr_text(pr=pr, lines=lines);
+  }
+
+  return @../act(pr=pr, lines=lines);
+}

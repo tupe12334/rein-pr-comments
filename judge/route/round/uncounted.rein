@@ -1,0 +1,14 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+}
+
+/**
+ * The review round cannot be counted. Neither the cap nor the critical stop
+ * can be applied, so the run stops and releases the claim.
+ */
+export default function uncounted({ pr }: Input) {
+  return `Release your claim on ${pr}: post a comment, 🤖 Released by
+    <your session id or name>. Return: skipped ${pr}:
+    the review round could not be counted.`;
+}

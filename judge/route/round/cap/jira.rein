@@ -1,0 +1,30 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** One line per open comment: its link, agree or disagree, critical, Low. */
+  lines: string;
+}
+
+/**
+ * Track the agreed points of a closed review loop in the Jira ticket of the
+ * pull request, and reply on each thread with the ticket link. A title or
+ * body point is fixed on the pull request, and its thread is resolved.
+ */
+export default async function jira({ pr, lines }: Input) {
+  /** Did you track each agreed point and reply on its thread? */
+  const tracked: boolean = await request(`Of these comments on ${pr}:
+    ${lines}. For each comment marked agree about the title or body of
+    ${pr}, fix the title or body now with gh pr edit, and reply with exactly
+    this text: 🤖 Fixed in the title or body of ${pr}. Then resolve that
+    thread with the GraphQL mutation resolveReviewThread. Add no ticket for
+    it. For each other comment marked agree, add its point to the Jira ticket
+    whose key is in the branch name, title or body of ${pr}, as one
+    checklist comment that starts "Review follow-ups for ${pr}". Use the
+    Atlassian tools. Then reply on that thread with exactly this text, where
+    <link> is the link of the Jira ticket: 🤖 Review loop cap reached (5
+    rounds); tracked as follow-up <link>. Post no other reply, and change no
+    code. Start each post with 🤖. Answer yes if every point is tracked and
+    every reply is posted, and every title or body thread is resolved.`);
+
+  return @./done(pr=pr, tracked=tracked);
+}

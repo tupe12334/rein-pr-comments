@@ -1,0 +1,43 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** Were the Low points tracked? */
+  tracked: boolean;
+  /** One line per agreed point that is not Low, or none. */
+  fix_lines: string;
+  /** Is any agreed point not Low? */
+  fix_points: boolean;
+  /** Is any agreed point about the title or body of the pull request? */
+  pr_text_points: boolean;
+}
+
+/**
+ * After the Low points are noted and tracked: stop when they could not be
+ * tracked, fix the points that need a fix, or move on to the merge when none
+ * needs one. A Low point is never fixed from round 4.
+ */
+export default function moveOn({
+  pr,
+  tracked,
+  fix_lines,
+  fix_points,
+  pr_text_points,
+}: Input) {
+  if (!tracked) {
+    return `Release your claim on ${pr}: post a comment, 🤖 Released by
+    <your session id or name>. Return: skipped ${pr}:
+    a Low point could not be tracked.`;
+  }
+
+  if (fix_points || pr_text_points) {
+    if (pr_text_points) {
+      return @../edit_pr_text(pr=pr, lines=fix_lines);
+    }
+
+    return @../act(pr=pr, lines=fix_lines);
+  }
+
+  return `Start this program again for ${pr} with the task merge, so CI and
+  conflicts are checked before any merge. Every Low point is noted and
+  tracked, and none needs a fix. Threads left as noted do not block.`;
+}

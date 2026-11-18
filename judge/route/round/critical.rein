@@ -1,0 +1,16 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** One line per critical point: its link and the point, or none. */
+  critical_lines: string;
+}
+
+/**
+ * The review loop is closed, and a critical point is still open. Only the
+ * owner can decide it, so the flow stops and asks.
+ */
+export default function critical({ pr, critical_lines }: Input) {
+  return askUser(question=`The review loop of ${pr} is closed after five
+    rounds. This critical point is open: ${critical_lines}. Should it be
+    fixed in ${pr} before the merge, or merged as it is?`);
+}

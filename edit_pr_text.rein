@@ -1,0 +1,29 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** One line per open comment: its link, then agree or disagree, and for
+   * agree, whether it is critical. */
+  lines: string;
+}
+
+/**
+ * Fix each agreed point about the pull request's own title or body on the
+ * pull request now. Such a point never becomes an issue: after the merge
+ * the text is history, and no pull request can fix it.
+ */
+export default async function editPrText({ pr, lines }: Input) {
+  /** Did you fix the title or body for each such point? */
+  const edited: boolean = await request(`Of these comments on ${pr}:
+    ${lines}. For each one you agree with that is about the title or body
+    of ${pr}, fix the title or body now with gh pr edit --title or --body.
+    Reply on the comment that it is fixed. Open no issue for it.
+    Start each post with 🤖.`);
+
+  if (!edited) {
+    return `Release your claim on ${pr}: post a comment, 🤖 Released by
+    <your session id or name>. Return: skipped ${pr}: a review point about
+    its title or body could not be fixed.`;
+  }
+
+  return @./act(pr=pr, lines=lines);
+}

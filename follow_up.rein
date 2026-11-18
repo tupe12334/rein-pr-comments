@@ -1,0 +1,18 @@
+interface Input {
+  /** The link of the pull request whose review comments were acted on. */
+  pr: string;
+  /** Were fix commits pushed to the branch of the pull request in this run? */
+  pushed: boolean;
+}
+
+/**
+ * After the review comments were fixed on the branch or answered: ask
+ * whether the judgment disagrees, then resolve the threads that are done.
+ */
+export default async function followUp({ pr, pushed }: Input) {
+  /** Does your judgment disagree with any open comment? */
+  const disagree: boolean = await request(`Answer yes if your judgment
+    disagrees with any open comment on ${pr}.`);
+
+  return @./follow_up/resolve_threads(pr=pr, pushed=pushed, disagree=disagree);
+}

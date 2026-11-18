@@ -1,0 +1,42 @@
+interface Input {
+  /** The link of the pull request with the review comments. */
+  pr: string;
+  /** The review round, as the script printed it, such as 4. */
+  round: string;
+  /** One line per open comment: its link, agree or disagree, critical, Low. */
+  lines: string;
+  /** One line per agreed point that is not Low, or none. */
+  fix_lines: string;
+  /** Is any agreed point not Low? */
+  fix_points: boolean;
+  /** Is any agreed point about the title or body of the pull request? */
+  pr_text_points: boolean;
+}
+
+/**
+ * Track the Low points of a pull request in one GitHub issue. The issue is
+ * opened once per pull request, and each later Low point is added to it. Each
+ * Low thread gets its noted reply only after its point is tracked.
+ */
+export default async function issue({
+  pr, round, lines, fix_lines, fix_points, pr_text_points,
+}: Input) {
+  /** Did you track each Low point, and then note its thread? */
+  const tracked: boolean = await request(`Of these comments on ${pr}:
+    ${lines}. Track each comment whose point is Low in one GitHub issue of
+    this repository, titled "Review follow-ups for #<number>" with the
+    number of ${pr}. Open the issue once; if it exists, add each later point
+    to it as a checklist line with its comment link. Only after that, reply
+    on each such thread with exactly this text:
+    🤖 Noted as a low follow-up (review round ${round}); not addressed in
+    this PR. Post no other reply, and change no code. Start each post with 🤖.
+    Answer yes if every Low point is tracked and every reply is posted.`);
+
+  return @./move_on(
+    pr=pr,
+    tracked=tracked,
+    fix_lines=fix_lines,
+    fix_points=fix_points,
+    pr_text_points=pr_text_points,
+  );
+}
