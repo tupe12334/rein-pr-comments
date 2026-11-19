@@ -1,4 +1,4 @@
-import { disagree } from "./disagree";
+import { disagree as openDisagree } from "./disagree";
 import { report } from "./resolve_threads/report";
 
 interface Input {
@@ -46,7 +46,7 @@ export default async function resolveThreads(
     when no thread is left open.`);
 
   if (disagree) {
-    return disagree(pr=pr);
+    return openDisagree(pr=pr);
   }
 
   return report(

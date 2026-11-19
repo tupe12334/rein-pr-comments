@@ -9,7 +9,7 @@ This program was extracted from [rein-pr-handling](https://github.com/tupe12334/
 ## Install
 
 ```sh
-rein install -g github:tupe12334/rein-pr-comments#v0.2.0
+rein install -g github:tupe12334/rein-pr-comments#v0.3.0
 ```
 
 ## Use
