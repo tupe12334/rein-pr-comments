@@ -1,3 +1,5 @@
+import { judge } from "./judge";
+
 interface Input {
   /** The link of the pull request with the review comments. */
   pr: string;
@@ -34,5 +36,5 @@ export default async function addressComments({ pr }: Input) {
     ${pr}, no comment is open.`;
   }
 
-  return @./judge(pr=pr);
+  return judge(pr=pr);
 }

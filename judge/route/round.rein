@@ -1,3 +1,10 @@
+import { uncounted } from "./round/uncounted";
+import { critical } from "./round/critical";
+import { cap } from "./round/cap";
+import { track } from "../../low/track";
+import { editPrText } from "../../edit_pr_text";
+import { act } from "../../act";
+
 interface Input {
   /** The link of the pull request with the review comments. */
   pr: string;
@@ -47,19 +54,19 @@ export default async function reviewRound({
     more, round_6_plus yes when it is 6 or more, and counted no when the
     script fails or prints nothing; then the other answers are no.`);
   if (!round.counted) {
-    return @./round/uncounted(pr=pr);
+    return uncounted(pr=pr);
   }
 
   if (round.round_6_plus && critical_points) {
-    return @./round/critical(pr=pr, critical_lines=critical_lines);
+    return critical(pr=pr, critical_lines=critical_lines);
   }
 
   if (round.round_6_plus) {
-    return @./round/cap(pr=pr, lines=lines);
+    return cap(pr=pr, lines=lines);
   }
 
   if (round.round_4_plus && low_points) {
-    return @../../low/track(
+    return track(
       pr=pr,
       round=round.round,
       lines=lines,
@@ -70,8 +77,8 @@ export default async function reviewRound({
   }
 
   if (pr_text_points) {
-    return @../../edit_pr_text(pr=pr, lines=lines);
+    return editPrText(pr=pr, lines=lines);
   }
 
-  return @../../act(pr=pr, lines=lines);
+  return act(pr=pr, lines=lines);
 }

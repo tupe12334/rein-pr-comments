@@ -9,16 +9,18 @@ This program was extracted from [rein-pr-handling](https://github.com/tupe12334/
 ## Install
 
 ```sh
-rein install -g github:tupe12334/rein-pr-comments#v0.1.0
+rein install -g github:tupe12334/rein-pr-comments#v0.2.0
 ```
 
 ## Use
 
-A caller awaits the program with the link of the pull request. The `const` needs a doc comment above it:
+A caller imports the program by name and awaits it with the link of the pull request. The `const` needs a doc comment above it:
 
 ```text
+import { main } from "pr-comments";
+
 /** Judge the open review comments on a pull request, then act on them. */
-const answer: string = await @pr-comments/main(pr=<pull request link>);
+const answer: string = await main(pr=<pull request link>);
 ```
 
 - `pr`: the link of the pull request with the review comments.
