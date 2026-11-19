@@ -1,6 +1,6 @@
 {
   "name": "pr-comments",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Judge the open review comments on a pull request, then act on them.",
   "license": "MIT",
   "private": true,
