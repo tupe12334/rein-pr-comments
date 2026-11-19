@@ -1,3 +1,6 @@
+import { editPrText } from "../edit_pr_text";
+import { act } from "../act";
+
 interface Input {
   /** The link of the pull request with the review comments. */
   pr: string;
@@ -31,10 +34,10 @@ export default function moveOn({
 
   if (fix_points || pr_text_points) {
     if (pr_text_points) {
-      return @../edit_pr_text(pr=pr, lines=fix_lines);
+      return editPrText(pr=pr, lines=fix_lines);
     }
 
-    return @../act(pr=pr, lines=fix_lines);
+    return act(pr=pr, lines=fix_lines);
   }
 
   return `Start this program again for ${pr} with the task merge, so CI and

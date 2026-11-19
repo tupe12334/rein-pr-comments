@@ -1,3 +1,6 @@
+import { jira } from "./cap/jira";
+import { issue } from "./cap/issue";
+
 interface Input {
   /** The link of the pull request with the review comments. */
   pr: string;
@@ -22,8 +25,8 @@ export default async function cap({ pr, lines }: Input) {
     Otherwise answer no.`);
 
   if (tracker.jira_linked) {
-    return @./cap/jira(pr=pr, lines=lines);
+    return jira(pr=pr, lines=lines);
   }
 
-  return @./cap/issue(pr=pr, lines=lines);
+  return issue(pr=pr, lines=lines);
 }

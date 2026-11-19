@@ -1,3 +1,6 @@
+import { jira } from "./jira";
+import { issue } from "./issue";
+
 interface Input {
   /** The link of the pull request with the review comments. */
   pr: string;
@@ -32,10 +35,10 @@ export default async function track({
     Otherwise answer no.`);
 
   if (tracker.jira_linked) {
-    return @./jira(pr=pr, round=round, lines=lines, fix_lines=fix_lines,
+    return jira(pr=pr, round=round, lines=lines, fix_lines=fix_lines,
       fix_points=fix_points, pr_text_points=pr_text_points);
   }
 
-  return @./issue(pr=pr, round=round, lines=lines, fix_lines=fix_lines,
+  return issue(pr=pr, round=round, lines=lines, fix_lines=fix_lines,
     fix_points=fix_points, pr_text_points=pr_text_points);
 }

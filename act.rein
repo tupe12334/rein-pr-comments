@@ -1,3 +1,6 @@
+import { followUp } from "./follow_up";
+import { pushFixes } from "./act/push_fixes";
+
 interface Input {
   /** The link of the pull request with the review comments. */
   pr: string;
@@ -20,7 +23,7 @@ export default async function act({ pr, lines }: Input) {
     point about the title or body, or a point already fixed on the branch.`);
 
   if (!fix_points) {
-    return @./follow_up(pr=pr, pushed=false);
+    return followUp(pr=pr, pushed=false);
   }
 
   /** Is the author of the pull request this account, the owner's own? */
@@ -35,5 +38,5 @@ export default async function act({ pr, lines }: Input) {
     branch was not changed.`;
   }
 
-  return @./act/push_fixes(pr=pr, lines=lines);
+  return pushFixes(pr=pr, lines=lines);
 }

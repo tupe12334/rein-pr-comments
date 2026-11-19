@@ -1,3 +1,7 @@
+import { reviewRound } from "./route/round";
+import { editPrText } from "../edit_pr_text";
+import { act } from "../act";
+
 interface Input {
   /** The link of the pull request with the review comments. */
   pr: string;
@@ -32,7 +36,7 @@ export default function route({
   critical_lines,
 }: Input) {
   if (critical_points || low_points || fix_points) {
-    return @./route/round(
+    return reviewRound(
       pr=pr,
       lines=lines,
       fix_lines=fix_lines,
@@ -45,8 +49,8 @@ export default function route({
   }
 
   if (pr_text_points) {
-    return @../edit_pr_text(pr=pr, lines=lines);
+    return editPrText(pr=pr, lines=lines);
   }
 
-  return @../act(pr=pr, lines=lines);
+  return act(pr=pr, lines=lines);
 }

@@ -1,3 +1,5 @@
+import { route } from "./judge/route";
+
 interface Input {
   /** The link of the pull request with the review comments. */
   pr: string;
@@ -49,7 +51,7 @@ export default async function judge({ pr }: Input) {
     critical. Answer pr_text_points yes if any agreed point is about the title
     or body of ${pr}.`);
 
-  return @./judge/route(
+  return route(
     pr=pr,
     lines=judgment.lines,
     fix_lines=judgment.fix_lines,

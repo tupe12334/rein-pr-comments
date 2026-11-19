@@ -1,3 +1,5 @@
+import { followUp } from "../follow_up";
+
 interface Input {
   /** The link of the pull request of this account, with review comments. */
   pr: string;
@@ -41,5 +43,5 @@ export default async function pushFixes({ pr, lines }: Input) {
     were not fixed on its branch.`;
   }
 
-  return @../follow_up(pr=pr, pushed=true);
+  return followUp(pr=pr, pushed=true);
 }
